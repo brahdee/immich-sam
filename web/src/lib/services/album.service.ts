@@ -55,6 +55,7 @@ export const getAlbumsActions = ($t: MessageFormatter) => {
 export const getAlbumActions = ($t: MessageFormatter, album: AlbumResponseDto) => {
   const isOwned = isAlbumOwner(album);
   const isEditor = isAlbumEditor(album);
+  const canShare = authManager.user.isAdmin || isOwned;
 
   const AddUsers: ActionItem = {
     title: $t('add_user'),
@@ -64,7 +65,10 @@ export const getAlbumActions = ($t: MessageFormatter, album: AlbumResponseDto) =
       modalManager.show(AddUsersModal, {
         excludedUserIds: album.albumUsers.map(({ user: { id } }) => id),
         // TODO that explicit UserResponseDto[] shouldn't be necessary, but svelte's types seem to be messed up right now and AlbumAddUsersModal has a bad type
-        onAddUsers: (users: UserResponseDto[]) => handleAddUsersToAlbum(album, users),
+        onAddUsers: async (users: UserResponseDto[]) => {
+          const result = await handleAddUsersToAlbum(album, users);
+          return result !== undefined;
+        },
       }),
   };
 
@@ -113,7 +117,7 @@ export const getAlbumActions = ($t: MessageFormatter, album: AlbumResponseDto) =
   const Share: ActionItem = {
     title: $t('share'),
     icon: mdiShareVariantOutline,
-    $if: () => isOwned,
+    $if: () => canShare,
     onAction: () => modalManager.show(AlbumOptionsModal, { album }),
   };
 

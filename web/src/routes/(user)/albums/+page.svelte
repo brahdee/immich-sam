@@ -55,6 +55,7 @@
     sharedAlbums={queries.sharedAlbums.data}
     userSettings={$albumViewSettings}
     allowEdit
+    showOwner
     {searchQuery}
     bind:albumGroupIds={albumGroups}
   >

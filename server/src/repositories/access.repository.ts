@@ -73,6 +73,22 @@ class ActivityAccess {
 class AlbumAccess {
   constructor(private db: Kysely<DB>) {}
 
+  @GenerateSql({ params: [DummyValue.UUID_SET] })
+  @ChunkedSet({ paramIndex: 0 })
+  async checkReadAccess(albumIds: Set<string>) {
+    if (albumIds.size === 0) {
+      return new Set<string>();
+    }
+
+    return this.db
+      .selectFrom('album')
+      .select('album.id')
+      .where('album.id', 'in', [...albumIds])
+      .where('album.deletedAt', 'is', null)
+      .execute()
+      .then((albums) => new Set(albums.map((album) => album.id)));
+  }
+
   @GenerateSql({ params: [DummyValue.UUID, DummyValue.UUID_SET] })
   @ChunkedSet({ paramIndex: 1 })
   async checkOwnerAccess(userId: string, albumIds: Set<string>) {
@@ -142,6 +158,48 @@ class AlbumAccess {
 
 class AssetAccess {
   constructor(private db: Kysely<DB>) {}
+
+  @GenerateSql({ params: [DummyValue.UUID_SET] })
+  @ChunkedSet({ paramIndex: 0 })
+  async checkAlbumReadAccess(assetIds: Set<string>) {
+    if (assetIds.size === 0) {
+      return new Set<string>();
+    }
+
+    return this.db
+      .with('target', (qb) => qb.selectNoFrom(sql`array[${sql.join([...assetIds])}]::uuid[]`.as('ids')))
+      .selectFrom('album')
+      .innerJoin('album_asset as albumAssets', 'album.id', 'albumAssets.albumId')
+      .innerJoin('asset', (join) =>
+        join.onRef('asset.id', '=', 'albumAssets.assetId').on('asset.deletedAt', 'is', null),
+      )
+      .crossJoin('target')
+      .select(['asset.id', 'asset.livePhotoVideoId'])
+      .where((eb) =>
+        eb.or([
+          eb('asset.id', '=', sql<string>`any(target.ids)`),
+          eb('asset.livePhotoVideoId', '=', sql<string>`any(target.ids)`),
+        ]),
+      )
+      .where('album.deletedAt', 'is', null)
+      .where('asset.visibility', '!=', sql.lit(AssetVisibility.Locked))
+      .execute()
+      .then((assets) => {
+        const allowedIds = new Set<string>();
+
+        for (const asset of assets) {
+          if (assetIds.has(asset.id)) {
+            allowedIds.add(asset.id);
+          }
+
+          if (asset.livePhotoVideoId && assetIds.has(asset.livePhotoVideoId)) {
+            allowedIds.add(asset.livePhotoVideoId);
+          }
+        }
+
+        return allowedIds;
+      });
+  }
 
   @GenerateSql({ params: [DummyValue.UUID, DummyValue.UUID_SET] })
   @ChunkedSet({ paramIndex: 1 })

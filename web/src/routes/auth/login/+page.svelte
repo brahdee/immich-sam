@@ -169,6 +169,10 @@
       </Alert>
     {/if}
 
+    <p class="text-centered mb-1 text-sm text-gray-400">
+      Custom version of Immich for SAM.<br />Text me (braddy) for access
+    </p>
+
     {#if !oauthLoading && publicConfig.passwordLogin.enabled}
       <form {onsubmit} class="flex flex-col gap-4">
         {#if errorMessage}

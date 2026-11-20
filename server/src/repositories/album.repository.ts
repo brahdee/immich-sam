@@ -149,23 +149,42 @@ export class AlbumRepository {
   private buildAlbumBaseQuery(ownerId: string, { isOwned, isShared }: { isOwned?: boolean; isShared?: boolean }) {
     return this.db
       .selectFrom('album')
-      .innerJoin('album_user', (join) =>
-        join.onRef('album_user.albumId', '=', 'album.id').on('album_user.userId', '=', ownerId),
+      .leftJoin('album_user as currentUser', (join) =>
+        join.onRef('currentUser.albumId', '=', 'album.id').on('currentUser.userId', '=', ownerId),
       )
       .where('album.deletedAt', 'is', null)
-      .$if(isOwned === true, (qb) => qb.where('album_user.role', '=', sql.lit(AlbumUserRole.Owner)))
-      .$if(isOwned === false, (qb) => qb.where('album_user.role', '!=', sql.lit(AlbumUserRole.Owner)))
+      .$if(isOwned === true, (qb) => qb.where('currentUser.role', '=', sql.lit(AlbumUserRole.Owner)))
+      .$if(isOwned === false, (qb) =>
+        qb.where((eb) =>
+          eb.or([eb('currentUser.role', '!=', sql.lit(AlbumUserRole.Owner)), eb('currentUser.role', 'is', null)]),
+        ),
+      )
       .$if(isShared !== undefined, (qb) =>
         qb.where((eb) => {
           const isSharedAlbum = eb.or([
+            // Albums not owned by the current user are globally accessible.
+            eb.not(
+              eb.exists(
+                eb
+                  .selectFrom('album_user as owner')
+                  .whereRef('owner.albumId', '=', 'album.id')
+                  .where('owner.userId', '=', ownerId)
+                  .where('owner.role', '=', sql.lit(AlbumUserRole.Owner)),
+              ),
+            ),
+
+            // Albums explicitly shared with other users.
             eb.exists(
               eb
                 .selectFrom('album_user as au')
                 .whereRef('au.albumId', '=', 'album.id')
                 .where('au.role', '!=', sql.lit(AlbumUserRole.Owner)),
             ),
+
+            // Albums with shared links.
             eb.exists(eb.selectFrom('shared_link').whereRef('shared_link.albumId', '=', 'album.id')),
           ]);
+
           return isShared ? isSharedAlbum : eb.not(isSharedAlbum);
         }),
       );

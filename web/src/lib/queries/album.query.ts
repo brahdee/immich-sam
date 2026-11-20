@@ -36,9 +36,11 @@ const isOwned = (album: AlbumResponseDto) =>
   authManager.authenticated &&
   album.albumUsers.some(({ role, user }) => role === AlbumUserRole.Owner && user.id === authManager.user.id);
 
+const isVisibleAsShared = (album: AlbumResponseDto) => album.shared || !isOwned(album);
+
 const matchesFilter = (filter: AlbumsFilter) => (album: AlbumResponseDto) =>
   (filter.isOwned === undefined || isOwned(album) === filter.isOwned) &&
-  (filter.isShared === undefined || album.shared === filter.isShared);
+  (filter.isShared === undefined || isVisibleAsShared(album) === filter.isShared);
 
 const findOrFail = (albums: AlbumResponseDto[], id: string) => {
   const album = albums.find((album) => album.id === id);

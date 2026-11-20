@@ -44,6 +44,19 @@
 </script>
 
 <Sidebar ariaLabel={$t('primary')}>
+  <NavbarItem
+    title={$t('albums')}
+    href={Route.albums()}
+    icon={{ icon: mdiImageAlbum, flipped: true }}
+    bind:expanded={$recentAlbumsDropdown}
+  >
+    {#snippet items()}
+      <span in:fly={{ y: -20 }} class="hidden md:block">
+        <RecentAlbums />
+      </span>
+    {/snippet}
+  </NavbarItem>
+
   <NavbarItem title={$t('photos')} href={Route.photos()} icon={mdiImageMultipleOutline} activeIcon={mdiImageMultiple} />
 
   <NavbarItem title={$t('explore')} href={Route.explore()} icon={mdiMagnify} />
@@ -74,19 +87,6 @@
   <NavbarGroup title={$t('library')} size="tiny" />
 
   <NavbarItem title={$t('favorites')} href={Route.favorites()} icon={mdiHeartOutline} activeIcon={mdiHeart} />
-
-  <NavbarItem
-    title={$t('albums')}
-    href={Route.albums()}
-    icon={{ icon: mdiImageAlbum, flipped: true }}
-    bind:expanded={$recentAlbumsDropdown}
-  >
-    {#snippet items()}
-      <span in:fly={{ y: -20 }} class="hidden md:block">
-        <RecentAlbums />
-      </span>
-    {/snippet}
-  </NavbarItem>
 
   {#if authManager.preferences.tags.enabled && authManager.preferences.tags.sidebarWeb}
     <NavbarItem title={$t('tags')} href={Route.tags()} icon={{ icon: mdiTagMultipleOutline, flipped: true }} />

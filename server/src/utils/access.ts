@@ -118,15 +118,15 @@ const checkSharedLinkAccess = async (
 
   switch (permission) {
     case Permission.AssetRead: {
-      return await access.asset.checkSharedLinkAccess(sharedLinkId, ids);
+      return await access.asset.checkAlbumReadAccess(ids);
     }
 
     case Permission.AssetView: {
-      return await access.asset.checkSharedLinkAccess(sharedLinkId, ids);
+      return await access.asset.checkAlbumReadAccess(ids);
     }
 
     case Permission.AssetDownload: {
-      return sharedLink.allowDownload ? await access.asset.checkSharedLinkAccess(sharedLinkId, ids) : new Set();
+      return await access.asset.checkAlbumReadAccess(ids);
     }
 
     case Permission.AssetUpload: {
@@ -134,11 +134,11 @@ const checkSharedLinkAccess = async (
     }
 
     case Permission.AlbumRead: {
-      return await access.album.checkSharedLinkAccess(sharedLinkId, ids);
+      return await access.asset.checkAlbumReadAccess(ids);
     }
 
     case Permission.AlbumDownload: {
-      return sharedLink.allowDownload ? await access.album.checkSharedLinkAccess(sharedLinkId, ids) : new Set();
+      return await access.asset.checkAlbumReadAccess(ids);
     }
 
     case Permission.AlbumAssetCreate: {
@@ -169,7 +169,7 @@ const checkOtherAccess = async (access: AccessRepository, request: OtherAccessRe
 
     case Permission.AssetRead: {
       const isOwner = await access.asset.checkOwnerAccess(auth.user.id, ids, auth.session?.hasElevatedPermission);
-      const isAlbum = await access.asset.checkAlbumAccess(auth.user.id, ids.difference(isOwner));
+      const isAlbum = await access.asset.checkAlbumReadAccess(ids.difference(isOwner));
       const isPartner = await access.asset.checkPartnerAccess(
         auth.user.id,
         ids.difference(isOwner).difference(isAlbum),
@@ -193,7 +193,7 @@ const checkOtherAccess = async (access: AccessRepository, request: OtherAccessRe
 
     case Permission.AssetView: {
       const isOwner = await access.asset.checkOwnerAccess(auth.user.id, ids, auth.session?.hasElevatedPermission);
-      const isAlbum = await access.asset.checkAlbumAccess(auth.user.id, ids.difference(isOwner));
+      const isAlbum = await access.asset.checkAlbumReadAccess(ids.difference(isOwner));
       const isPartner = await access.asset.checkPartnerAccess(
         auth.user.id,
         ids.difference(isOwner).difference(isAlbum),
@@ -203,7 +203,7 @@ const checkOtherAccess = async (access: AccessRepository, request: OtherAccessRe
 
     case Permission.AssetDownload: {
       const isOwner = await access.asset.checkOwnerAccess(auth.user.id, ids, auth.session?.hasElevatedPermission);
-      const isAlbum = await access.asset.checkAlbumAccess(auth.user.id, ids.difference(isOwner));
+      const isAlbum = await access.asset.checkAlbumReadAccess(ids.difference(isOwner));
       const isPartner = await access.asset.checkPartnerAccess(
         auth.user.id,
         ids.difference(isOwner).difference(isAlbum),
@@ -241,13 +241,7 @@ const checkOtherAccess = async (access: AccessRepository, request: OtherAccessRe
     }
 
     case Permission.AlbumRead: {
-      const isOwner = await access.album.checkOwnerAccess(auth.user.id, ids);
-      const isShared = await access.album.checkSharedAlbumAccess(
-        auth.user.id,
-        ids.difference(isOwner),
-        AlbumUserRole.Viewer,
-      );
-      return isOwner.union(isShared);
+      return access.album.checkReadAccess(ids);
     }
 
     case Permission.AlbumAssetCreate: {
@@ -275,23 +269,22 @@ const checkOtherAccess = async (access: AccessRepository, request: OtherAccessRe
     }
 
     case Permission.AlbumShare: {
+      if (auth.user.isAdmin) {
+        return access.album.checkReadAccess(ids);
+      }
+
       const isOwner = await access.album.checkOwnerAccess(auth.user.id, ids);
       const isShared = await access.album.checkSharedAlbumAccess(
         auth.user.id,
         ids.difference(isOwner),
         AlbumUserRole.Editor,
       );
+
       return isOwner.union(isShared);
     }
 
     case Permission.AlbumDownload: {
-      const isOwner = await access.album.checkOwnerAccess(auth.user.id, ids);
-      const isShared = await access.album.checkSharedAlbumAccess(
-        auth.user.id,
-        ids.difference(isOwner),
-        AlbumUserRole.Viewer,
-      );
-      return isOwner.union(isShared);
+      return access.album.checkReadAccess(ids);
     }
 
     case Permission.AlbumAssetDelete: {
