@@ -169,9 +169,10 @@
       </Alert>
     {/if}
 
-    <p class="text-centered mb-1 text-sm text-gray-400">
-      Custom version of Immich for SAM.<br />Text me (braddy) for access
-    </p>
+    <h2 class="mb-1 text-center text-gray-400">
+      <span class="block text-xl font-semibold">SAM photo drive ayeee</span>
+      <span class="block text-sm font-normal">text me (braddy) for access if u cant get in</span>
+    </h2>
 
     {#if !oauthLoading && publicConfig.passwordLogin.enabled}
       <form {onsubmit} class="flex flex-col gap-4">
