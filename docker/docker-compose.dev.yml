@@ -20,7 +20,7 @@ services:
       - /tmp
     volumes:
       - ..:/usr/src/app
-      - ../../ui:/usr/src/ui
+      - ../ui:/usr/src/ui
       - build_cache:/buildcache
       - server_node_modules:/usr/src/app/server/node_modules
       - web_node_modules:/usr/src/app/web/node_modules

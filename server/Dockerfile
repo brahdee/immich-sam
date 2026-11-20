@@ -43,6 +43,16 @@ RUN --mount=type=cache,id=pnpm,target=/buildcache/pnpm-store \
 
 FROM sdk AS web
 
+# Include and build the custom UI fork
+COPY ./ui /usr/src/ui
+
+RUN --mount=type=cache,id=pnpm,target=/buildcache/pnpm-store \
+  cd /usr/src/ui && \
+  pnpm install --filter @immich/ui --frozen-lockfile && \
+  pnpm --filter @immich/ui sync && \
+  pnpm --filter @immich/ui build
+
+# Build the Immich frontend
 COPY ./web/package.json ./web/package.json
 RUN --mount=type=cache,id=pnpm,target=/buildcache/pnpm-store pnpm --filter immich-web install --frozen-lockfile
 
