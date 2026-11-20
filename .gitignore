@@ -29,3 +29,23 @@ vite.config.js.timestamp-*
 *.tsbuildinfo
 *.tsbuildInfo
 misc/release/notes.md
+
+# FVM Version Cache
+.fvm/
+
+.env.*
+!.env.example
+docker/.env
+docker/.env.*
+
+/library/
+/postgres/
+/backups/
+
+.history/
+*.log
+*.tmp
+*.temp
+
+playwright-report/
+test-results/

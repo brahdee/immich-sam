@@ -129,9 +129,9 @@ export default defineConfig({
   resolve: {
     alias: {
       'xmlhttprequest-ssl': './node_modules/engine.io-client/lib/xmlhttprequest.js',
+      '@immich/ui': path.resolve(import.meta.dirname, '../../ui/packages/ui'),
     },
   },
-  // '@immich/ui': path.resolve(import.meta.dirname, '../../ui/packages/ui'),
   server: {
     // connect to a remote backend during web-only development
     proxy: process.env.VITEST ? {} : proxy,

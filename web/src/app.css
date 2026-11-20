@@ -1,8 +1,8 @@
 @import 'tailwindcss';
-@import '@immich/ui/theme/default.css';
+/* @import '@immich/ui/theme/default.css'; */
 
-@source "../node_modules/@immich/ui";
-/* @import '../../../ui/packages/ui/dist/theme/default.css'; */
+@source "../../../ui/packages/ui/src";
+@import '../../../ui/packages/ui/dist/theme/default.css';
 
 @custom-variant dark (&:where(.dark, .dark *):not(.light));
 
