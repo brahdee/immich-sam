@@ -38,7 +38,10 @@ export type TimelineAsset = {
   people: string[] | null;
   latitude?: number | null;
   longitude?: number | null;
-  albumName?: string | null;
+  albums?: {
+    id: string;
+    albumName: string;
+  }[];
 };
 
 export type MoveAsset = { asset: TimelineAsset; date: TimelineDate };

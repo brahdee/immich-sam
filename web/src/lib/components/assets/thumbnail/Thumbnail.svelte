@@ -3,6 +3,7 @@
   import { ProjectionType } from '#lib/constants.ts';
   import { authManager } from '#lib/managers/auth-manager.svelte.ts';
   import type { TimelineAsset } from '#lib/managers/timeline-manager/types.ts';
+  import { Route } from '#lib/route.ts';
   import { mediaQueryManager } from '#lib/stores/media-query-manager.svelte.ts';
   import { locale, playVideoThumbnailOnHover } from '#lib/stores/preferences.store.ts';
   import { getAssetMediaUrl, getAssetPlaybackUrl } from '#lib/utils.ts';
@@ -318,13 +319,25 @@
           ></div>
         {/if}
 
-        {#if asset.albumName}
-          <div class="pointer-events-none absolute right-2 bottom-2 z-2 max-w-[80%]">
+        {#if asset.albums?.length}
+          <div class="pointer-events-none absolute bottom-2 right-2 z-2 max-w-[80%]">
             <p
-              class="text-white-shadow max-w-full truncate rounded-sm bg-black/30 px-2 py-1 text-xs font-medium text-white"
-              title={asset.albumName}
+              class="max-w-full truncate rounded bg-black/30 px-2 py-1 text-xs font-medium text-white text-white-shadow"
             >
-              {asset.albumName}
+              {#each asset.albums as linkedAlbum, i (linkedAlbum.id)}
+                {#if i > 0}
+                  <span> • </span>
+                {/if}
+
+                <a
+                  href={Route.viewAlbum({ id: linkedAlbum.id })}
+                  onclick={(event) => event.stopPropagation()}
+                  class="pointer-events-auto hover:underline"
+                  title={linkedAlbum.albumName}
+                >
+                  {linkedAlbum.albumName}
+                </a>
+              {/each}
             </p>
           </div>
         {/if}

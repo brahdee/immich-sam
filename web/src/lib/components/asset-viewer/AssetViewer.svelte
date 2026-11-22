@@ -18,8 +18,10 @@
     getActivityStatisticsQuery,
     getMyLikeQuery,
   } from '#lib/queries/activity.query.ts';
+  import { getAlbumsByAssetQuery } from '#lib/queries/album.query.ts';
   import { executeMutation, queryClient } from '#lib/queries/client.ts';
   import { getStackQuery } from '#lib/queries/stack.query.ts';
+  import { Route } from '#lib/route.ts';
   import { getAssetActions } from '#lib/services/asset.service.ts';
   import { faceManager } from '#lib/stores/face.svelte.ts';
   import { ocrManager } from '#lib/stores/ocr.svelte.ts';
@@ -125,7 +127,12 @@
       enabled: isActivityEnabled,
     })),
     myLike: createQuery(() => ({ ...getMyLikeQuery(activityParams), enabled: isActivityEnabled })),
+    albums: createQuery(() => ({
+      ...getAlbumsByAssetQuery(asset.id),
+      enabled: authManager.authenticated && !authManager.isSharedLink,
+    })),
   };
+  const albumNamesText = $derived((queries.albums.data ?? []).map(({ albumName }) => albumName).join(' • '));
   const stack = $derived(
     queries.stack.data?.assets.some(({ id }) => id === cursor.current.id) ? queries.stack.data : undefined,
   );
@@ -519,6 +526,22 @@
         {isPlayingOriginalVideo}
         {setPlayOriginalVideo}
       />
+    </div>
+  {/if}
+
+  {#if queries.albums.data?.length && $slideshowState === SlideshowState.None && !assetViewerManager.isShowEditor && !showDetailPanel}
+    <div class="pointer-events-none absolute bottom-6 right-6 z-30 flex max-w-[80vw] flex-col items-end gap-2">
+      {#each queries.albums.data as linkedAlbum (linkedAlbum.id)}
+        <a
+          href={Route.viewAlbum({ id: linkedAlbum.id })}
+          onclick={(event) => event.stopPropagation()}
+          onkeydown={(event) => event.stopPropagation()}
+          class="pointer-events-auto block max-w-full truncate rounded bg-black/30 px-3 py-1.5 text-sm font-medium text-white text-white-shadow hover:bg-black/80"
+          title={linkedAlbum.albumName}
+        >
+          {linkedAlbum.albumName}
+        </a>
+      {/each}
     </div>
   {/if}
 

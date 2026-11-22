@@ -873,17 +873,30 @@ export class AssetRepository {
           .$if(!options.albumId, (qb) =>
             qb.select(
               sql<string | null>`(
-      SELECT string_agg(
-        DISTINCT album."albumName",
-        ' • '
-        ORDER BY album."albumName"
-      )
-      FROM album_asset
-      INNER JOIN album
-        ON album.id = album_asset."albumId"
-      WHERE album_asset."assetId" = asset.id
-        AND album."deletedAt" IS NULL
-    )`.as('albumName'),
+                SELECT string_agg(
+                  DISTINCT album."albumName",
+                  ' • '
+                  ORDER BY album."albumName"
+                )
+                FROM album_asset
+                INNER JOIN album
+                  ON album.id = album_asset."albumId"
+                WHERE album_asset."assetId" = asset.id
+                  AND album."deletedAt" IS NULL
+              )`.as('albumName'),
+            ),
+          )
+          .$if(!auth.sharedLink && !options.albumId, (qb) =>
+            qb.select((eb) =>
+              jsonArrayFrom(
+                eb
+                  .selectFrom('album_asset')
+                  .innerJoin('album', 'album.id', 'album_asset.albumId')
+                  .select(['album.id', 'album.albumName'])
+                  .whereRef('album_asset.assetId', '=', 'asset.id')
+                  .where('album.deletedAt', 'is', null)
+                  .orderBy('album.albumName'),
+              ).as('albums'),
             ),
           )
           .$if(!isMetadataHidden(auth), (qb) => qb.select(['asset_exif.city', 'asset_exif.country']))
@@ -1000,8 +1013,8 @@ export class AssetRepository {
             eb.fn.coalesce(eb.fn('array_agg', ['status']), sql.lit('{}')).as('status'),
             eb.fn.coalesce(eb.fn('array_agg', ['thumbhash']), sql.lit('{}')).as('thumbhash'),
           ])
-          .$if(!options.albumId, (qb) =>
-            qb.select((eb) => eb.fn.coalesce(eb.fn('array_agg', ['albumName']), sql.lit('{}')).as('albumName')),
+          .$if(!auth.sharedLink && !options.albumId, (qb) =>
+            qb.select((eb) => eb.fn.coalesce(eb.fn('array_agg', ['albums']), sql.lit('{}')).as('albums')),
           )
           .$if(!isMetadataHidden(auth), (qb) =>
             qb.select((eb) => [

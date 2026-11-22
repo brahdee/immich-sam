@@ -33810,13 +33810,27 @@
       },
       "TimeBucketAssetResponseDto": {
         "properties": {
-          "albumName": {
-            "description": "Album names associated with each asset",
+          "albums": {
+            "description": "Albums associated with each asset",
             "items": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "items": {
+                "properties": {
+                  "albumName": {
+                    "type": "string"
+                  },
+                  "id": {
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "albumName",
+                  "id"
+                ],
+                "type": "object"
+              },
+              "type": "array"
             },
             "type": "array"
           },
