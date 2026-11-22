@@ -41,7 +41,11 @@ export class TimelineService extends BaseService {
       }
     }
 
-    return { ...options, userIds };
+    return {
+      ...options,
+      userIds,
+      includeAlbumAssets: !options.albumId && userId === auth.user.id,
+    };
   }
 
   private async timeBucketChecks(auth: AuthDto, dto: TimeBucketDto) {

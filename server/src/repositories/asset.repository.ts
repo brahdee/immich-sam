@@ -98,6 +98,7 @@ interface AssetBuilderOptions {
 export interface TimeBucketOptions extends AssetBuilderOptions {
   order?: AssetOrder;
   orderBy?: AssetOrderBy;
+  includeAlbumAssets?: boolean;
 }
 
 export interface TimeBucketItem {
@@ -159,6 +160,18 @@ const getBoundingCircle = (bbox: BoundingBox) => {
 
   return { centerLatitude, centerLongitude, radius };
 };
+
+const inAccessibleAlbum = (eb: ExpressionBuilder<DB, 'asset'>) =>
+  eb.and([
+    eb('asset.visibility', '!=', sql.lit(AssetVisibility.Locked)),
+    eb.exists(
+      eb
+        .selectFrom('album_asset')
+        .innerJoin('album', 'album.id', 'album_asset.albumId')
+        .whereRef('album_asset.assetId', '=', 'asset.id')
+        .where('album.deletedAt', 'is', null),
+    ),
+  ]);
 
 const withBoundingBox = <T>(qb: SelectQueryBuilder<DB, 'asset' | 'asset_exif', T>, bbox: BoundingBox) => {
   const { west, south, east, north } = bbox;
@@ -789,8 +802,16 @@ export class AssetRepository {
           )
           .$if(!!options.userIds, (qb) =>
             qb.where((eb) => {
-              // TODO this should become a shared `hasAccess` style helper once implement sharing in more places
               const isOwner = eb('asset.ownerId', '=', anyUuid(options.userIds!));
+
+              if (options.includeAlbumAssets) {
+                const isInAlbum = inAccessibleAlbum(eb);
+
+                return options.personId
+                  ? eb.or([isOwner, inSharedAlbum(auth.user.id, 'asset.id'), isInAlbum])
+                  : eb.or([isOwner, isInAlbum]);
+              }
+
               return options.personId ? eb.or([isOwner, inSharedAlbum(auth.user.id, 'asset.id')]) : isOwner;
             }),
           )
@@ -888,6 +909,15 @@ export class AssetRepository {
           .$if(!!options.userIds, (qb) =>
             qb.where((eb) => {
               const isOwner = eb('asset.ownerId', '=', anyUuid(options.userIds!));
+
+              if (options.includeAlbumAssets) {
+                const isInAlbum = inAccessibleAlbum(eb);
+
+                return options.personId
+                  ? eb.or([isOwner, inSharedAlbum(auth.user.id, 'asset.id'), isInAlbum])
+                  : eb.or([isOwner, isInAlbum]);
+              }
+
               return options.personId ? eb.or([isOwner, inSharedAlbum(auth.user.id, 'asset.id')]) : isOwner;
             }),
           )
