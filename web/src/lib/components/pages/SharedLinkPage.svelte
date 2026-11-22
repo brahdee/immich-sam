@@ -2,7 +2,6 @@
   import AlbumViewer from '#lib/components/album-page/AlbumViewer.svelte';
   import IndividualSharedViewer from '#lib/components/share-page/IndividualSharedViewer.svelte';
   import ControlAppBar from '#lib/components/shared-components/ControlAppBar.svelte';
-  import ThemeButton from '#lib/components/shared-components/ThemeButton.svelte';
   import { assetViewerManager } from '#lib/managers/asset-viewer-manager.svelte.ts';
   import { authManager } from '#lib/managers/auth-manager.svelte.ts';
   import { sharedLinkLoginMutation } from '#lib/queries/shared-link.query.ts';
@@ -89,10 +88,6 @@
         <a data-sveltekit-preload-data="hover" class="ms-4" href="/">
           <Logo variant="inline" />
         </a>
-      {/snippet}
-
-      {#snippet trailing()}
-        <ThemeButton />
       {/snippet}
     </ControlAppBar>
   </header>

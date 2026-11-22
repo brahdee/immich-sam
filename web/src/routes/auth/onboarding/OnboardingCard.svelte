@@ -74,9 +74,7 @@
           onNext?.();
         }}
       >
-        <span class="flex place-content-center place-items-center gap-2">
-          {nextTitle ?? $t('done')}
-        </span>
+        <span class="flex place-content-center place-items-center gap-2"> ok cool </span>
       </Button>
     </div>
   </div>

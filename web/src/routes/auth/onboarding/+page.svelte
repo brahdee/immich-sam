@@ -6,40 +6,17 @@
   import { setUserOnboardingMutation } from '#lib/queries/user.query.ts';
   import { Route } from '#lib/route.ts';
   import { OnboardingRole } from '#lib/types.ts';
-  import {
-    mdiCellphoneArrowDownVariant,
-    mdiCloudCheckOutline,
-    mdiHarddisk,
-    mdiIncognito,
-    mdiThemeLightDark,
-    mdiTranslate,
-  } from '@mdi/js';
-  import { t } from 'svelte-i18n';
   import { goto } from '$app/navigation';
   import { page } from '$app/state';
-  import OnboardingBackup from './OnboardingBackup.svelte';
   import OnboardingCard from './OnboardingCard.svelte';
   import OnboardingHello from './OnboardingHello.svelte';
-  import OnboardingLocale from './OnboardingLanguage.svelte';
-  import OnboardingMobileApp from './OnboardingMobileApp.svelte';
-  import OnboardingServerPrivacy from './OnboardingServerPrivacy.svelte';
-  import OnboardingStorageTemplate from './OnboardingStorageTemplate.svelte';
-  import OnboardingTheme from './OnboardingTheme.svelte';
-  import OnboardingUserPrivacy from './OnboardingUserPrivacy.svelte';
 
   const query = createPreloadedQuery(getServerConfigQuery);
   const serverConfig = $derived(query.data);
 
   interface OnboardingStep {
     name: string;
-    component:
-      | typeof OnboardingHello
-      | typeof OnboardingTheme
-      | typeof OnboardingStorageTemplate
-      | typeof OnboardingServerPrivacy
-      | typeof OnboardingUserPrivacy
-      | typeof OnboardingMobileApp
-      | typeof OnboardingLocale;
+    component: typeof OnboardingHello;
     role: OnboardingRole;
     title?: string;
     icon?: string;
@@ -47,55 +24,6 @@
 
   const onboardingSteps: OnboardingStep[] = $derived([
     { name: 'hello', component: OnboardingHello, role: OnboardingRole.USER },
-    {
-      name: 'theme',
-      component: OnboardingTheme,
-      role: OnboardingRole.USER,
-      title: $t('theme'),
-      icon: mdiThemeLightDark,
-    },
-    {
-      name: 'language',
-      component: OnboardingLocale,
-      role: OnboardingRole.USER,
-      title: $t('language'),
-      icon: mdiTranslate,
-    },
-    {
-      name: 'server_privacy',
-      component: OnboardingServerPrivacy,
-      role: OnboardingRole.SERVER,
-      title: $t('server_privacy'),
-      icon: mdiIncognito,
-    },
-    {
-      name: 'user_privacy',
-      component: OnboardingUserPrivacy,
-      role: OnboardingRole.USER,
-      title: $t('user_privacy'),
-      icon: mdiIncognito,
-    },
-    {
-      name: 'storage_template',
-      component: OnboardingStorageTemplate,
-      role: OnboardingRole.SERVER,
-      title: $t('admin.storage_template_settings'),
-      icon: mdiHarddisk,
-    },
-    {
-      name: 'backup',
-      component: OnboardingBackup,
-      role: OnboardingRole.SERVER,
-      title: $t('admin.backup_onboarding_title'),
-      icon: mdiCloudCheckOutline,
-    },
-    {
-      name: 'mobile_app',
-      component: OnboardingMobileApp,
-      role: OnboardingRole.USER,
-      title: $t('mobile_app'),
-      icon: mdiCellphoneArrowDownVariant,
-    },
   ]);
 
   const index = $derived.by(() => {

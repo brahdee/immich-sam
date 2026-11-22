@@ -21,7 +21,6 @@
   import { mdiDownload, mdiFileImagePlusOutline, mdiPresentationPlay } from '@mdi/js';
   import { t } from 'svelte-i18n';
   import ControlAppBar from '../shared-components/ControlAppBar.svelte';
-  import ThemeButton from '../shared-components/ThemeButton.svelte';
   import AlbumSummary from './AlbumSummary.svelte';
 
   const query = createPreloadedQuery(getPublicConfigQuery);
@@ -150,7 +149,6 @@
         {#if sharedLink.showMetadata && publicConfig.map.enabled}
           <AlbumMap {album} />
         {/if}
-        <ThemeButton />
       {/snippet}
     </ControlAppBar>
   {/if}

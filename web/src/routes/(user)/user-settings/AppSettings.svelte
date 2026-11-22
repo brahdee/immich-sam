@@ -12,7 +12,7 @@
     showDeleteModal,
   } from '#lib/stores/preferences.store.ts';
   import { createDateFormatter, findLocale } from '#lib/utils.ts';
-  import { Field, Switch, Text, Theme, ThemePreference, themeManager } from '@immich/ui';
+  import { Field, Switch, Text } from '@immich/ui';
   import { onMount } from 'svelte';
   import { t } from 'svelte-i18n';
   import { fade } from 'svelte/transition';
@@ -54,23 +54,11 @@
     value: findLocale(editedLocale).code || fallbackLocale.code,
     label: findLocale(editedLocale).name || fallbackLocale.name,
   });
-
-  const handleToggleSystemTheme = (checked: boolean) => {
-    const current = themeManager.value === Theme.Dark ? ThemePreference.Dark : ThemePreference.Light;
-    themeManager.setPreference(checked ? ThemePreference.System : current);
-  };
 </script>
 
 <section class="my-4">
   <div in:fade={{ duration: 500 }}>
     <div class="flex flex-col gap-6 sm:ms-8">
-      <Field label={$t('theme_selection')} description={$t('theme_selection_description')}>
-        <Switch
-          checked={themeManager.preference === ThemePreference.System}
-          onCheckedChange={handleToggleSystemTheme}
-        />
-      </Field>
-
       <SettingsLanguageSelector showSettingDescription />
 
       <Field label={$t('use_browser_locale')} description={$t('use_browser_locale_description')}>
