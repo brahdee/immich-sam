@@ -133,6 +133,9 @@
 
   :root.dark {
     color-scheme: dark;
+
+    --immich-ui-light: #0b050d;
+    --immich-dark-bg: 21 26 35;
   }
 
   :root:not(.dark) {
