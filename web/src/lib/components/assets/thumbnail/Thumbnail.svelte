@@ -318,6 +318,17 @@
           ></div>
         {/if}
 
+        {#if asset.albumName}
+          <div class="pointer-events-none absolute right-2 bottom-2 z-2 max-w-[80%]">
+            <p
+              class="text-white-shadow max-w-full truncate rounded-sm bg-black/30 px-2 py-1 text-xs font-medium text-white"
+              title={asset.albumName}
+            >
+              {asset.albumName}
+            </p>
+          </div>
+        {/if}
+
         <!-- Favorite asset star -->
         {#if !authManager.isSharedLink && asset.isFavorite}
           <div class="absolute inset-s-2 bottom-2 z-2">

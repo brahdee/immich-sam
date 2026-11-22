@@ -3257,6 +3257,8 @@ export type TagUpdateDto = {
     name?: string;
 };
 export type TimeBucketAssetResponseDto = {
+    /** Album names associated with each asset */
+    albumName?: (string | null)[];
     /** Array of city names extracted from EXIF GPS data */
     city?: (string | null)[];
     /** Array of country names extracted from EXIF GPS data */

@@ -33810,6 +33810,16 @@
       },
       "TimeBucketAssetResponseDto": {
         "properties": {
+          "albumName": {
+            "description": "Album names associated with each asset",
+            "items": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "type": "array"
+          },
           "city": {
             "description": "Array of city names extracted from EXIF GPS data",
             "items": {

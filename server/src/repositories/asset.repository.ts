@@ -870,6 +870,22 @@ export class AssetRepository {
               )
               .as('ratio'),
           ])
+          .$if(!options.albumId, (qb) =>
+            qb.select(
+              sql<string | null>`(
+      SELECT string_agg(
+        DISTINCT album."albumName",
+        ' • '
+        ORDER BY album."albumName"
+      )
+      FROM album_asset
+      INNER JOIN album
+        ON album.id = album_asset."albumId"
+      WHERE album_asset."assetId" = asset.id
+        AND album."deletedAt" IS NULL
+    )`.as('albumName'),
+            ),
+          )
           .$if(!isMetadataHidden(auth), (qb) => qb.select(['asset_exif.city', 'asset_exif.country']))
           .$if(!!options.withCoordinates, (qb) => qb.select(['asset_exif.latitude', 'asset_exif.longitude']))
           .where('asset.deletedAt', options.isTrashed ? 'is not' : 'is', null)
@@ -984,6 +1000,9 @@ export class AssetRepository {
             eb.fn.coalesce(eb.fn('array_agg', ['status']), sql.lit('{}')).as('status'),
             eb.fn.coalesce(eb.fn('array_agg', ['thumbhash']), sql.lit('{}')).as('thumbhash'),
           ])
+          .$if(!options.albumId, (qb) =>
+            qb.select((eb) => eb.fn.coalesce(eb.fn('array_agg', ['albumName']), sql.lit('{}')).as('albumName')),
+          )
           .$if(!isMetadataHidden(auth), (qb) =>
             qb.select((eb) => [
               eb.fn.coalesce(eb.fn('array_agg', ['city']), sql.lit('{}')).as('city'),
